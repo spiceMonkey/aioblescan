@@ -644,8 +644,8 @@ class Float88:
         val=pack(">h",int(self.val*256))
         return val
 
-    def decode(self,data):
-        self.val= unpack(">h",data)[0]/256.0
+    def decode(self,data): 
+        self.val= unpack(">h",data[:2])[0]/256.0 # CHANGE: unpack(">h", data) -> unpack(">h", data[:2])
         return data[2:]
     def __len__(self):
         return 2
