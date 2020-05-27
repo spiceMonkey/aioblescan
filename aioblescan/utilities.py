@@ -84,7 +84,7 @@ def RSL10v3_decode(packet, UUID=b"\x53\xac\x89\xd1\xec\x35\x5e\xbb\x84\xe1\x8d\x
     #found.payload.append(myinfo)
     result["humidity"]=myinfo.val
     # Pressure
-    myinfo_lo=aios.UshortInt("pressure_low", 'little')
+    myinfo_lo=aios.UShortInt("pressure_low", 'little')
     data=myinfo_lo.decode(data)
     myinfo_hi=aios.UIntByte("pressure_low")
     data=myinfo_low.decode(data)
