@@ -7,7 +7,7 @@ with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(name='aioblescan',
-    packages=['aioblescan','aioblescan.plugins', 'utilities'],
+    packages=['aioblescan','aioblescan.plugins'],
     #packages=setuptools.find_packages(),
     version=version,
     author='François Wautier',
