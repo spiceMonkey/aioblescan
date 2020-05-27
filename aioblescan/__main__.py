@@ -31,6 +31,94 @@ from aioblescan.plugins import RuuviWeather
 from aioblescan.plugins import BlueMaestro
 from utilities import *
 
+# Decode customized 128-bit V3 beacon from RSL10 evaluation board
+def RSL10v3_decode(packet, UUID=b"\x53\xac\x89\xd1\xec\x35\x5e\xbb\x84\xe1\x8d\xad\xb5\xd4\xdb\x84"):
+    """Check a parsed packet and figure out if it is a RSL10V3 Beacon.
+    If it is , return the relevant data as a dictionary.
+
+    Return None, it is not a RSL10V3 Beacon advertising packet"""
+
+    ssu=packet.retrieve("Complete uuids")
+    found=False
+    for x in ssu:
+        if UUID in x:
+            found=True
+            break
+    if not found:
+        return None
+
+    found=False
+    adv=packet.retrieve("Advertised Data")
+    for x in adv:
+        luuid=x.retrieve("Service Data uuid")
+        for uuid in luuid:
+            if UUID == uuid:
+                found=x
+                break
+        if found:
+            break
+
+
+    if not found:
+        return None
+
+    try:
+        top=found.retrieve("Adv Payload")[0]
+    except:
+        return None
+    #Rebuild that part of the structure
+    found.payload.remove(top)
+    #Now decode
+    result={}
+    data=top.val
+    #etype = aios.EnumByte("type",self.type.val,{ESType.uid.value:"Eddystone-UID",
+    #                                        ESType.url.value:"Eddystone-URL",
+    #                                        ESType.tlm.value:"Eddystone-TLM",
+    #                                        ESType.eid.value:"Eddystone-EID"})
+    #data=etype.decode(data)
+    #found.payload.append(etype)
+    # start message decoding
+    # temperature
+    myinfo=aios.ShortInt("temperature", 'little')
+    data=myinfo.decode(data)
+    #found.payload.append(myinfo)
+    result["temperature"]=myinfo.val
+    # humidity in percentage
+    myinfo=aios.UShortInt("humidity", 'little')
+    data=myinfo.decode(data)
+    #found.payload.append(myinfo)
+    result["humidity"]=myinfo.val
+    # Pressure
+    myinfo_lo=aios.UShortInt("pressure_lo", 'little')
+    data=myinfo_lo.decode(data)
+    myinfo_hi=aios.UIntByte("pressure_hi")
+    data=myinfo_low.decode(data)
+    result["pressure"]=myinfo_lo.val + myinfo_hi.val<<8
+    #found.payload.append(myinfo)
+    # format version, no need to save
+    myinfo=aios.IntByte("version")
+    data=myinfo.decode(data)
+    #found.payload.append(myinfo)
+    # tilt_x value
+    myinfo=aios.IntByte("tilt_x")
+    data=myinfo.decode(data)
+    result["tilt_x"]=myinfo.val
+    #found.payload.append(myinfo)
+    # tilt_y value
+    myinfo=aios.IntByte("tilt_y")
+    data=myinfo.decode(data)
+    result["tilt_y"]=myinfo.val
+    #found.payload.append(myinfo)
+    # return RSSI value
+    rssi=packet.retrieve("rssi")
+    if rssi:
+        result["rssi"]=rssi[-1].val
+    mac=packet.retrieve("peer")
+    # return MAC address
+    if mac:
+        result["mac address"]=mac[-1].val
+
+    return result
 
 def check_mac(val):
     try:
