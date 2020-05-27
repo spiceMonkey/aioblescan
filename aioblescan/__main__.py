@@ -29,7 +29,6 @@ import aioblescan as aiobs
 from aioblescan.plugins import EddyStone
 from aioblescan.plugins import RuuviWeather
 from aioblescan.plugins import BlueMaestro
-from utilities import *
 
 # Decode customized 128-bit V3 beacon from RSL10 evaluation board
 def RSL10v3_decode(packet, UUID=b"\x53\xac\x89\xd1\xec\x35\x5e\xbb\x84\xe1\x8d\xad\xb5\xd4\xdb\x84"):
